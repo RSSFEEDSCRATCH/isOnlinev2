@@ -2,9 +2,14 @@ chrome.runtime.onInstalled.addListener(function(details){
     if(details.reason == "install"){
         chrome.tabs.create({url:"https://scratchtools.tk/isonline/register/"});}
     if(details.reason == "update"){
-        //chrome.tabs.create({url: "https://scratch.mit.edu/isonline-extension/update"});
+        chrome.tabs.create({url: "https://scratch.mit.edu/isonline-extension/update"});
+        chrome.storage.sync.get("iOfriendsenabled", function (data) {
+            if(data.iOfriendsenabled==1){localStorage.setItem("iOnotifications","1");}});
+        chrome.storage.sync.remove("iOfriendsenabled");
+        localStorage.removeItem("iOfriendlistenabled");
     }
-});
+}
+                                      );
 
 let key, user;
 
@@ -15,6 +20,7 @@ chrome.runtime.onMessage.addListener(
         if (request.setuninstallurl) {
             chrome.runtime.setUninstallURL("https://scratchtools.tk/isonline/uninstall/?user="+request.setuninstallurl.name+"&key="+request.setuninstallurl.key);}
         if(request.color === ""){
+			localStorage.setItem("iOtabtimestamp",Math.floor(Date.now() / 1000));
             localStorage.setItem("iOstatus","online");
             chrome.browserAction.getBadgeText({}, function(result) {
                 if(result===" "){chrome.browserAction.setBadgeText({text: ""});}
@@ -39,13 +45,12 @@ chrome.runtime.onMessage.addListener(
     });
 
 setInterval(function(){
-    chrome.tabs.query({url:"https://scratch.mit.edu/*"}, function(tabs) {
-        if (tabs.length===0){chrome.browserAction.setBadgeText({text: ""});}
-    });
-}, 10000);
+        if (Math.floor(Date.now() / 1000)-localStorage.getItem("iOtabtimestamp")>6){chrome.browserAction.setBadgeText({text: ""});}
+}, 5000);
 
 
 function badge(thecolor) {
+	localStorage.setItem("iOtabtimestamp",Math.floor(Date.now() / 1000));
     chrome.browserAction.getBadgeText({}, function(result) {
         if(result===""){
             chrome.browserAction.setBadgeText({text: " "});}
